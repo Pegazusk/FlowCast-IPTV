@@ -42,7 +42,7 @@ def ip_de(peticion: Request) -> str | None:
     if configuracion.confiar_proxy:
         reenviada = peticion.headers.get("x-forwarded-for")
         if reenviada:
-            return reenviada.split(",")[0].strip()[:64]
+            return reenviada.split(",")[-1].strip()[:64]
     return peticion.client.host[:64] if peticion.client else None
 
 
