@@ -500,6 +500,15 @@
                 </div>
                 <p id="sesiones-mensaje" class="error"></p>
             </div>
+
+            <div id="seccion-eliminar" class="seccion">
+                <h4>Eliminar usuario</h4>
+                <p class="secundario">Borra la cuenta con todos sus perfiles, Mi Lista, Seguir viendo e historial. No se puede deshacer.</p>
+                <div class="acciones">
+                    <button id="boton-eliminar-usuario" class="boton peligro" type="button">Eliminar usuario</button>
+                </div>
+                <p id="eliminar-mensaje" class="error"></p>
+            </div>
         </div>
     </dialog>
 
@@ -997,6 +1006,8 @@
             $("boton-guardar").textContent = nuevo ? "Crear usuario" : "Guardar cambios";
             $("formulario-proveedor").classList.toggle("oculta", nuevo);
             $("seccion-sesiones").classList.toggle("oculta", nuevo);
+            $("seccion-eliminar").classList.toggle("oculta", nuevo || editando.id === sesion.usuario.id);
+            mensaje("eliminar-mensaje", "");
             ["datos-mensaje", "proveedor-mensaje", "sesiones-mensaje"].forEach((id) => mensaje(id, ""));
             if (nuevo) {
                 prepararProveedor($("bloque-proveedor-nuevo"), null);
@@ -1186,6 +1197,24 @@
                     mensaje("sesiones-mensaje", `Se cerraron ${resultado.cerradas} sesiones.`, true);
                 } catch (error) {
                     mensaje("sesiones-mensaje", error.message);
+                }
+            });
+        });
+
+        $("boton-eliminar-usuario").addEventListener("click", async () => {
+            const nombre = editando.nombre_usuario ? `${editando.nombre} (${editando.nombre_usuario})` : `${editando.nombre} (${editando.correo})`;
+            if (!confirm(`¿Eliminar a ${nombre}?\n\nSe borrarán sus perfiles, Mi Lista, Seguir viendo e historial, y se cerrarán sus sesiones. No se puede deshacer.`)) {
+                return;
+            }
+            await conBoton($("boton-eliminar-usuario"), async () => {
+                try {
+                    await api(`/admin/api/usuarios/${editando.id}`, "DELETE");
+                    usuarios = usuarios.filter((usuario) => usuario.id !== editando.id);
+                    $("dialogo").close();
+                    pintarUsuarios();
+                    await cargarCuentas();
+                } catch (error) {
+                    mensaje("eliminar-mensaje", error.message);
                 }
             });
         });

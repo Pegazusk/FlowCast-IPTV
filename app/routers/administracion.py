@@ -288,6 +288,22 @@ async def actualizar_usuario(
     return (await _describir(sesion_bd, [usuario]))[0]
 
 
+@router.delete("/usuarios/{usuario_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def borrar_usuario(
+    usuario_id: uuid.UUID, administrador: AdministradorActual, sesion_bd: SesionBD
+) -> None:
+    usuario = await _buscar_usuario(sesion_bd, usuario_id)
+    if usuario.id == administrador.id:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST, detail="No puedes eliminar tu propia cuenta"
+        )
+    conexiones = select(ConexionXtream.id).where(ConexionXtream.usuario_id == usuario.id)
+    for (conexion_id,) in (await sesion_bd.execute(conexiones)).all():
+        cache.invalidar(f"conexion:{conexion_id}:")
+    await sesion_bd.delete(usuario)
+    await sesion_bd.commit()
+
+
 @router.put("/usuarios/{usuario_id}/proveedor", response_model=RespuestaUsuarioAdministrado)
 async def cambiar_proveedor(
     usuario_id: uuid.UUID,
