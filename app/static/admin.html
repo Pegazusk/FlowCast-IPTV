@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FlowCast · Administración</title>
+    <style>
+        :root {
+            --fondo: #141414;
+            --tarjeta: #1f1f1f;
+            --pildora: #2a2a2a;
+            --borde: #333333;
+            --acento: #d9f64b;
+            --acento-oscuro: #3a4318;
+            --texto: #ffffff;
+            --texto-secundario: #a3a3a3;
+            --peligro: #ff6b6b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--fondo);
+            color: var(--texto);
+            font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+            font-size: 15px;
+        }
+
+        .oculta {
+            display: none !important;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .logo span {
+            margin-left: 4px;
+            padding: 1px 8px;
+            border-radius: 6px;
+            background: var(--acento);
+            color: #000000;
+        }
+
+        input,
+        button {
+            font: inherit;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="email"],
+        input[type="search"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--borde);
+            background: var(--fondo);
+            color: var(--texto);
+        }
+
+        input:focus {
+            outline: 2px solid var(--acento);
+            border-color: transparent;
+        }
+
+        label {
+            display: block;
+            margin: 14px 0 6px;
+            color: var(--texto-secundario);
+            font-size: 13px;
+        }
+
+        .boton {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            background: var(--pildora);
+            color: var(--texto);
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .boton:hover {
+            filter: brightness(1.2);
+        }
+
+        .boton.principal {
+            background: var(--acento);
+            color: #000000;
+        }
+
+        .boton.peligro {
+            background: transparent;
+            border: 1px solid var(--peligro);
+            color: var(--peligro);
+        }
+
+        .boton:disabled {
+            opacity: 0.5;
+            cursor: wait;
+        }
+
+        .error {
+            min-height: 20px;
+            margin: 12px 0 0;
+            color: var(--peligro);
+        }
+
+        .exito {
+            color: var(--acento);
+        }
+
+        #pantalla-login {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        .tarjeta-login {
+            width: 100%;
+            max-width: 380px;
+            padding: 32px;
+            border-radius: 16px;
+            background: var(--tarjeta);
+            border: 1px solid var(--borde);
+        }
+
+        .tarjeta-login h1 {
+            margin: 18px 0 4px;
+            font-size: 20px;
+        }
+
+        .tarjeta-login p {
+            margin: 0;
+            color: var(--texto-secundario);
+        }
+
+        .tarjeta-login .boton {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--borde);
+        }
+
+        header .titulo {
+            color: var(--texto-secundario);
+        }
+
+        header .espacio {
+            flex: 1;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .pestanas {
+            display: flex;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--borde);
+        }
+
+        .pestana {
+            margin-right: 8px;
+            padding: 12px 20px;
+            border: none;
+            border-bottom: 3px solid transparent;
+            background: none;
+            color: var(--texto-secundario);
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .pestana.activa {
+            border-bottom-color: var(--acento);
+            color: var(--texto);
+        }
+
+        textarea {
+            min-height: 70px;
+            resize: vertical;
+        }
+
+        .acciones-fila .boton {
+            margin: 0 6px 6px 0;
+        }
+
+        .barra {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .barra h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .barra input {
+            max-width: 280px;
+        }
+
+        .barra .espacio {
+            flex: 1;
+        }
+
+        .tabla-contenedor {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--borde);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--tarjeta);
+        }
+
+        th,
+        td {
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--borde);
+            white-space: nowrap;
+        }
+
+        th {
+            color: var(--texto-secundario);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .secundario {
+            color: var(--texto-secundario);
+            font-size: 13px;
+        }
+
+        .etiqueta {
+            display: inline-block;
+            margin-right: 4px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            background: var(--pildora);
+        }
+
+        .etiqueta.verde {
+            background: var(--acento-oscuro);
+            color: var(--acento);
+        }
+
+        .etiqueta.roja {
+            background: rgba(255, 107, 107, 0.15);
+            color: var(--peligro);
+        }
+
+        dialog {
+            width: 100%;
+            max-width: 560px;
+            padding: 0;
+            border: 1px solid var(--borde);
+            border-radius: 16px;
+            background: var(--tarjeta);
+            color: var(--texto);
+        }
+
+        dialog::backdrop {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .dialogo-cabecera {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--borde);
+        }
+
+        .dialogo-cabecera h3 {
+            margin: 0;
+        }
+
+        .dialogo-cuerpo {
+            max-height: 70vh;
+            padding: 8px 24px 24px;
+            overflow-y: auto;
+        }
+
+        .seccion {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--borde);
+        }
+
+        .seccion:first-child {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
+        }
+
+        .seccion h4 {
+            margin: 12px 0 0;
+        }
+
+        .casilla {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 14px 0 0;
+            color: var(--texto);
+            font-size: 15px;
+        }
+
+        .dispositivo {
+            margin-top: 12px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            background: var(--fondo);
+            border: 1px solid var(--borde);
+        }
+
+        .dispositivo-titulo {
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .dispositivo dl {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 4px 12px;
+            margin: 0 0 10px;
+            font-size: 13px;
+        }
+
+        .dispositivo dt {
+            color: var(--texto-secundario);
+        }
+
+        .dispositivo dd {
+            margin: 0;
+            word-break: break-word;
+        }
+
+        .acciones {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+    </style>
+</head>
+<body>
+    <section id="pantalla-login">
+        <form id="formulario-login" class="tarjeta-login">
+            <div class="logo">FLOW<span>CAST</span></div>
+            <h1>Administración</h1>
+            <p>Entra con una cuenta de administrador.</p>
+            <label for="login-usuario">Usuario</label>
+            <input id="login-usuario" type="text" autocomplete="username" required>
+            <label for="login-contrasena">Contraseña</label>
+            <input id="login-contrasena" type="password" autocomplete="current-password" required>
+            <button class="boton principal" type="submit">Entrar</button>
+            <p id="login-error" class="error"></p>
+        </form>
+    </section>
+
+    <section id="pantalla-panel" class="oculta">
+        <header>
+            <div class="logo">FLOW<span>CAST</span></div>
+            <span class="titulo">Administración</span>
+            <span class="espacio"></span>
+            <span id="administrador-actual" class="secundario"></span>
+            <button id="boton-salir" class="boton" type="button">Cerrar sesión</button>
+        </header>
+        <main>
+            <nav class="pestanas">
+                <button class="pestana activa" type="button" data-pestana="usuarios">Cuentas FlowCast</button>
+                <button class="pestana" type="button" data-pestana="proveedores">Cuentas de proveedor</button>
+            </nav>
+            <section id="vista-proveedores" class="oculta">
+                <div class="barra">
+                    <h2 id="titulo-proveedores">Cuentas de proveedor</h2>
+                    <span class="espacio"></span>
+                    <button id="boton-nueva-cuenta" class="boton principal" type="button">Nueva cuenta de proveedor</button>
+                </div>
+                <p id="proveedores-error" class="error"></p>
+                <div class="tabla-contenedor">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Servidor</th>
+                                <th>Usuario</th>
+                                <th>Estado</th>
+                                <th>Conexiones</th>
+                                <th>La usan</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-proveedores"></tbody>
+                    </table>
+                </div>
+            </section>
+            <section id="vista-usuarios">
+            <div class="barra">
+                <h2 id="titulo-usuarios">Usuarios</h2>
+                <span class="espacio"></span>
+                <input id="filtro" type="search" placeholder="Buscar por nombre o usuario">
+                <button id="boton-nuevo" class="boton principal" type="button">Nuevo usuario</button>
+            </div>
+            <p id="panel-error" class="error"></p>
+            <div class="tabla-contenedor">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Usuario</th>
+                            <th>Proveedor</th>
+                            <th>Sesiones</th>
+                            <th>Estado</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-usuarios"></tbody>
+                </table>
+            </div>
+            </section>
+        </main>
+    </section>
+
+    <dialog id="dialogo">
+        <div class="dialogo-cabecera">
+            <h3 id="dialogo-titulo"></h3>
+            <button id="boton-cerrar-dialogo" class="boton" type="button">Cerrar</button>
+        </div>
+        <div class="dialogo-cuerpo">
+            <form id="formulario-datos" class="seccion">
+                <h4 id="titulo-datos">Datos</h4>
+                <label for="campo-nombre">Nombre</label>
+                <input id="campo-nombre" type="text" required minlength="2" maxlength="120">
+                <label for="campo-usuario">Nombre de usuario (minúsculas, números, punto, guion)</label>
+                <input id="campo-usuario" type="text" required pattern="[a-zA-Z0-9._\-]{3,40}" autocomplete="off">
+                <label id="etiqueta-contrasena" for="campo-contrasena">Contraseña (mínimo 8)</label>
+                <input id="campo-contrasena" type="password" minlength="8" autocomplete="new-password">
+                <div id="bloque-correo">
+                    <label for="campo-correo">Correo (opcional)</label>
+                    <input id="campo-correo" type="email">
+                </div>
+                <label class="casilla"><input id="campo-administrador" type="checkbox"> Es administrador</label>
+                <label id="bloque-activo" class="casilla"><input id="campo-activo" type="checkbox"> Cuenta activa</label>
+                <div id="bloque-proveedor-nuevo"></div>
+                <div class="acciones">
+                    <button id="boton-guardar" class="boton principal" type="submit">Guardar</button>
+                </div>
+                <p id="datos-mensaje" class="error"></p>
+            </form>
+
+            <form id="formulario-proveedor" class="seccion">
+                <h4>Proveedor IPTV</h4>
+                <p id="proveedor-actual" class="secundario"></p>
+                <div id="bloque-proveedor"></div>
+                <div class="acciones">
+                    <button class="boton principal" type="submit">Cambiar proveedor</button>
+                </div>
+                <p id="proveedor-mensaje" class="error"></p>
+            </form>
+
+            <div id="seccion-sesiones" class="seccion">
+                <h4>Sesiones</h4>
+                <p id="sesiones-actuales" class="secundario"></p>
+                <div id="lista-dispositivos"></div>
+                <div class="acciones">
+                    <button id="boton-cerrar-sesiones" class="boton peligro" type="button">Cerrar todas sus sesiones</button>
+                </div>
+                <p id="sesiones-mensaje" class="error"></p>
+            </div>
+        </div>
+    </dialog>
+
+    <dialog id="dialogo-cuenta">
+        <div class="dialogo-cabecera">
+            <h3 id="cuenta-titulo"></h3>
+            <button id="boton-cerrar-cuenta" class="boton" type="button">Cerrar</button>
+        </div>
+        <div class="dialogo-cuerpo">
+            <form id="formulario-cuenta" class="seccion">
+                <label for="cuenta-etiqueta">Nombre (para reconocerla)</label>
+                <input id="cuenta-etiqueta" type="text" required maxlength="120">
+                <label for="cuenta-url">URL del servidor</label>
+                <input id="cuenta-url" type="text" required placeholder="http://servidor.com:8080">
+                <label for="cuenta-usuario">Usuario del proveedor</label>
+                <input id="cuenta-usuario" type="text" required autocomplete="off">
+                <label id="cuenta-etiqueta-contrasena" for="cuenta-contrasena">Contraseña del proveedor</label>
+                <input id="cuenta-contrasena" type="password" autocomplete="new-password">
+                <label for="cuenta-notas">Notas (opcional: plan, fecha de pago, contacto…)</label>
+                <textarea id="cuenta-notas" maxlength="2000"></textarea>
+                <label class="casilla"><input id="cuenta-predeterminada" type="checkbox"> Predeterminada para cuentas FlowCast nuevas</label>
+                <label class="casilla"><input id="cuenta-validar" type="checkbox" checked> Comprobar con el proveedor al guardar</label>
+                <p id="cuenta-afecta" class="secundario"></p>
+                <div class="acciones">
+                    <button id="boton-guardar-cuenta" class="boton principal" type="submit">Guardar</button>
+                </div>
+                <p id="cuenta-mensaje" class="error"></p>
+            </form>
+        </div>
+    </dialog>
+
+    <template id="plantilla-proveedor">
+        <label>Cuenta de proveedor</label>
+        <select data-elegir-cuenta></select>
+        <div class="campos-otro oculta">
+            <label>URL del servidor</label>
+            <input type="text" data-campo="url_base" placeholder="http://servidor.com:8080">
+            <label>Usuario del proveedor</label>
+            <input type="text" data-campo="nombre_usuario" autocomplete="off">
+            <label>Contraseña del proveedor</label>
+            <input type="password" data-campo="contrasena" autocomplete="new-password">
+        </div>
+    </template>
+
+    <script>
+        const CLAVE_SESION = "flowcast-administracion";
+        const $ = (id) => document.getElementById(id);
+        let sesion = leerSesion();
+        let usuarios = [];
+        let editando = null;
+
+        function leerSesion() {
+            try {
+                return JSON.parse(sessionStorage.getItem(CLAVE_SESION));
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function guardarSesion(datos) {
+            sesion = datos;
+            if (datos) {
+                sessionStorage.setItem(CLAVE_SESION, JSON.stringify(datos));
+            } else {
+                sessionStorage.removeItem(CLAVE_SESION);
+            }
+        }
+
+        function textoDeError(detalle, codigo) {
+            if (Array.isArray(detalle)) {
+                return detalle.map((error) => String(error.msg || "").replace(/^Value error, /, "")).join(". ");
+            }
+            return detalle || `Error ${codigo}`;
+        }
+
+        async function refrescar() {
+            if (!sesion) {
+                return false;
+            }
+            const respuesta = await fetch("/auth/refrescar", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token_refresco: sesion.token_refresco })
+            });
+            if (!respuesta.ok) {
+                return false;
+            }
+            guardarSesion(await respuesta.json());
+            return true;
+        }
+
+        async function api(ruta, metodo, cuerpo, reintentar = true) {
+            const cabeceras = { "Content-Type": "application/json" };
+            if (sesion) {
+                cabeceras.Authorization = `Bearer ${sesion.token_acceso}`;
+            }
+            const respuesta = await fetch(ruta, {
+                method: metodo || "GET",
+                headers: cabeceras,
+                body: cuerpo === undefined ? undefined : JSON.stringify(cuerpo)
+            });
+            if (respuesta.status === 401 && reintentar && sesion) {
+                if (await refrescar()) {
+                    return api(ruta, metodo, cuerpo, false);
+                }
+                mostrarLogin("Tu sesión caducó; vuelve a entrar.");
+                throw new Error("Tu sesión caducó");
+            }
+            if (respuesta.status === 204) {
+                return null;
+            }
+            const datos = await respuesta.json().catch(() => ({}));
+            if (!respuesta.ok) {
+                throw new Error(textoDeError(datos.detail, respuesta.status));
+            }
+            return datos;
+        }
+
+        function mostrarLogin(mensaje) {
+            guardarSesion(null);
+            $("pantalla-panel").classList.add("oculta");
+            $("pantalla-login").classList.remove("oculta");
+            $("login-error").textContent = mensaje || "";
+        }
+
+        async function mostrarPanel() {
+            $("pantalla-login").classList.add("oculta");
+            $("pantalla-panel").classList.remove("oculta");
+            $("administrador-actual").textContent = sesion.usuario.nombre_usuario || sesion.usuario.nombre;
+            await cargarCuentas();
+            await cargarUsuarios();
+        }
+
+        let cuentas = [];
+        let cuentaEditando = null;
+
+        async function cargarCuentas() {
+            try {
+                cuentas = await api("/admin/api/proveedores");
+                $("proveedores-error").textContent = "";
+            } catch (error) {
+                $("proveedores-error").textContent = error.message;
+                return;
+            }
+            pintarCuentas();
+        }
+
+        function boton(texto, clase, alPulsar) {
+            const elemento = document.createElement("button");
+            elemento.type = "button";
+            elemento.className = `boton ${clase || ""}`;
+            elemento.textContent = texto;
+            elemento.addEventListener("click", () => conBoton(elemento, alPulsar));
+            return elemento;
+        }
+
+        function pintarCuentas() {
+            $("titulo-proveedores").textContent = `Cuentas de proveedor (${cuentas.length})`;
+            const cuerpo = $("tabla-proveedores");
+            cuerpo.textContent = "";
+            cuentas.forEach((cuenta) => {
+                const fila = document.createElement("tr");
+                const nombre = celda(fila, cuenta.etiqueta, cuenta.notas || "");
+                if (cuenta.predeterminada) {
+                    etiqueta(nombre, "Predeterminada", "verde");
+                }
+                celda(fila, cuenta.servidor, cuenta.url_base);
+                celda(fila, cuenta.nombre_usuario);
+                const estado = celda(fila, "", cuenta.expira_en ? `vence ${formatearFecha(cuenta.expira_en)}` : "");
+                const activa = cuenta.estado_cuenta === "activa";
+                etiqueta(estado, cuenta.estado_cuenta, activa ? "verde" : (cuenta.estado_cuenta === "desconocido" ? "" : "roja"));
+                celda(fila, cuenta.max_conexiones ? `${cuenta.conexiones_activas ?? "?"} de ${cuenta.max_conexiones}` : "—",
+                    cuenta.ultima_revision_en ? `revisada ${haceCuanto(cuenta.ultima_revision_en)}` : "");
+                celda(fila, cuenta.usuarios.length ? cuenta.usuarios.join(", ") : "Nadie");
+                const acciones = celda(fila, "");
+                acciones.className = "acciones-fila";
+                acciones.appendChild(boton("Editar", "", async () => abrirCuenta(cuenta)));
+                acciones.appendChild(boton("Revisar", "", async () => {
+                    try {
+                        reemplazarCuenta(await api(`/admin/api/proveedores/${cuenta.id}/revisar`, "POST"));
+                    } catch (error) {
+                        $("proveedores-error").textContent = `${cuenta.etiqueta}: ${error.message}`;
+                    }
+                }));
+                acciones.appendChild(boton("Eliminar", "peligro", async () => {
+                    if (!confirm(`¿Eliminar la cuenta "${cuenta.etiqueta}"?`)) {
+                        return;
+                    }
+                    try {
+                        await api(`/admin/api/proveedores/${cuenta.id}`, "DELETE");
+                        cuentas = cuentas.filter((otra) => otra.id !== cuenta.id);
+                        pintarCuentas();
+                    } catch (error) {
+                        $("proveedores-error").textContent = error.message;
+                    }
+                }));
+                cuerpo.appendChild(fila);
+            });
+        }
+
+        function reemplazarCuenta(cuenta) {
+            if (cuenta.predeterminada) {
+                cuentas.forEach((otra) => {
+                    otra.predeterminada = false;
+                });
+            }
+            const posicion = cuentas.findIndex((otra) => otra.id === cuenta.id);
+            if (posicion >= 0) {
+                cuentas[posicion] = cuenta;
+            } else {
+                cuentas.push(cuenta);
+            }
+            $("proveedores-error").textContent = "";
+            pintarCuentas();
+            pintarUsuarios();
+        }
+
+        function abrirCuenta(cuenta) {
+            cuentaEditando = cuenta || null;
+            const nueva = !cuentaEditando;
+            $("cuenta-titulo").textContent = nueva ? "Nueva cuenta de proveedor" : `Editar ${cuenta.etiqueta}`;
+            $("cuenta-etiqueta").value = nueva ? "" : cuenta.etiqueta;
+            $("cuenta-url").value = nueva ? "" : cuenta.url_base;
+            $("cuenta-usuario").value = nueva ? "" : cuenta.nombre_usuario;
+            $("cuenta-contrasena").value = "";
+            $("cuenta-contrasena").required = nueva;
+            $("cuenta-etiqueta-contrasena").textContent = nueva ? "Contraseña del proveedor" : "Contraseña del proveedor (déjala vacía para no cambiarla)";
+            $("cuenta-notas").value = nueva ? "" : cuenta.notas || "";
+            $("cuenta-predeterminada").checked = nueva ? !cuentas.length : cuenta.predeterminada;
+            $("cuenta-validar").checked = true;
+            $("cuenta-afecta").textContent = !nueva && cuenta.usuarios.length
+                ? `Los cambios se aplicarán también a: ${cuenta.usuarios.join(", ")}.`
+                : "";
+            mensaje("cuenta-mensaje", "");
+            $("boton-guardar-cuenta").textContent = nueva ? "Crear cuenta" : "Guardar cambios";
+            $("dialogo-cuenta").showModal();
+        }
+
+        function mostrarPestana(nombre) {
+            document.querySelectorAll(".pestana").forEach((pestana) => pestana.classList.toggle("activa", pestana.dataset.pestana === nombre));
+            $("vista-usuarios").classList.toggle("oculta", nombre !== "usuarios");
+            $("vista-proveedores").classList.toggle("oculta", nombre !== "proveedores");
+            if (nombre === "proveedores") {
+                cargarCuentas();
+            }
+        }
+
+        async function cargarUsuarios() {
+            try {
+                usuarios = await api("/admin/api/usuarios");
+                $("panel-error").textContent = "";
+            } catch (error) {
+                $("panel-error").textContent = error.message;
+                return;
+            }
+            pintarUsuarios();
+        }
+
+        function formatearFecha(texto) {
+            return texto ? new Date(texto).toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" }) : "";
+        }
+
+        function celda(fila, texto, secundario) {
+            const td = document.createElement("td");
+            td.textContent = texto;
+            if (secundario) {
+                const linea = document.createElement("div");
+                linea.className = "secundario";
+                linea.textContent = secundario;
+                td.appendChild(linea);
+            }
+            fila.appendChild(td);
+            return td;
+        }
+
+        function etiqueta(contenedor, texto, color) {
+            const span = document.createElement("span");
+            span.className = `etiqueta ${color || ""}`;
+            span.textContent = texto;
+            contenedor.appendChild(span);
+        }
+
+        function pintarUsuarios() {
+            const filtro = $("filtro").value.trim().toLowerCase();
+            const visibles = usuarios.filter((usuario) =>
+                !filtro || `${usuario.nombre} ${usuario.nombre_usuario || ""} ${usuario.correo}`.toLowerCase().indexOf(filtro) >= 0
+            );
+            $("titulo-usuarios").textContent = `Usuarios (${usuarios.length})`;
+            const cuerpo = $("tabla-usuarios");
+            cuerpo.textContent = "";
+            visibles.forEach((usuario) => {
+                const fila = document.createElement("tr");
+                celda(fila, usuario.nombre, usuario.correo);
+                celda(fila, usuario.nombre_usuario || "— sin usuario —");
+                const proveedor = usuario.proveedores[0];
+                const cuentaDelUsuario = proveedor && cuentas.find((cuenta) => cuenta.id === proveedor.cuenta_id);
+                celda(
+                    fila,
+                    proveedor ? (cuentaDelUsuario ? `${cuentaDelUsuario.etiqueta} · ${proveedor.servidor}` : proveedor.servidor) : "Sin proveedor",
+                    proveedor ? [proveedor.estado_cuenta, proveedor.expira_en ? `vence ${formatearFecha(proveedor.expira_en)}` : ""].filter(Boolean).join(" · ") : ""
+                );
+                celda(fila, String(usuario.sesiones_activas));
+                const estado = celda(fila, "");
+                etiqueta(estado, usuario.activo ? "Activo" : "Desactivado", usuario.activo ? "verde" : "roja");
+                if (usuario.es_administrador) {
+                    etiqueta(estado, "Admin");
+                }
+                const acciones = celda(fila, "");
+                const boton = document.createElement("button");
+                boton.className = "boton";
+                boton.type = "button";
+                boton.textContent = "Editar";
+                boton.addEventListener("click", () => abrirDialogo(usuario));
+                acciones.appendChild(boton);
+                cuerpo.appendChild(fila);
+            });
+        }
+
+        function prepararProveedor(contenedor, cuentaActual) {
+            contenedor.textContent = "";
+            contenedor.appendChild($("plantilla-proveedor").content.cloneNode(true));
+            const selector = contenedor.querySelector("[data-elegir-cuenta]");
+            const otro = contenedor.querySelector(".campos-otro");
+            cuentas.forEach((cuenta) => {
+                const opcion = document.createElement("option");
+                opcion.value = cuenta.id;
+                opcion.textContent = `${cuenta.etiqueta} — ${cuenta.servidor} (${cuenta.nombre_usuario})${cuenta.predeterminada ? " · predeterminada" : ""}`;
+                selector.appendChild(opcion);
+            });
+            const manual = document.createElement("option");
+            manual.value = "otro";
+            manual.textContent = "Otra cuenta (escribir datos)";
+            selector.appendChild(manual);
+            const predeterminada = cuentas.find((cuenta) => cuenta.predeterminada);
+            selector.value = cuentaActual || (predeterminada ? predeterminada.id : (cuentas[0] ? cuentas[0].id : "otro"));
+            const alternar = () => otro.classList.toggle("oculta", selector.value !== "otro");
+            selector.addEventListener("change", alternar);
+            alternar();
+        }
+
+        function leerProveedor(contenedor) {
+            const elegido = contenedor.querySelector("[data-elegir-cuenta]").value;
+            if (elegido !== "otro") {
+                return { cuenta_id: elegido };
+            }
+            const datos = { predeterminado: false };
+            contenedor.querySelectorAll("[data-campo]").forEach((campo) => {
+                datos[campo.dataset.campo] = campo.value.trim();
+            });
+            return datos;
+        }
+
+        function mensaje(id, texto, exito) {
+            const elemento = $(id);
+            elemento.textContent = texto || "";
+            elemento.classList.toggle("exito", !!exito);
+        }
+
+        const ETIQUETAS_DISPOSITIVO = {
+            tipo: "Tipo",
+            fabricante: "Fabricante",
+            modelo: "Modelo",
+            modelo_codigo: "Código de modelo",
+            sistema: "Sistema",
+            version_sistema: "Versión del sistema",
+            firmware: "Firmware",
+            version_app: "Versión de FlowCast",
+            resolucion: "Resolución",
+            ip_local: "IP local",
+            mac: "MAC",
+            duid: "DUID",
+            idioma: "Idioma"
+        };
+
+        function fechaYHora(texto) {
+            return texto ? new Date(texto).toLocaleString("es-MX", { dateStyle: "medium", timeStyle: "short" }) : "";
+        }
+
+        function haceCuanto(texto) {
+            const minutos = Math.round((Date.now() - new Date(texto).getTime()) / 60000);
+            if (minutos < 1) {
+                return "hace un momento";
+            }
+            if (minutos < 60) {
+                return `hace ${minutos} min`;
+            }
+            if (minutos < 1440) {
+                return `hace ${Math.round(minutos / 60)} h`;
+            }
+            return `hace ${Math.round(minutos / 1440)} días`;
+        }
+
+        function fila(lista, etiqueta, valor) {
+            if (valor === undefined || valor === null || valor === "") {
+                return;
+            }
+            const dt = document.createElement("dt");
+            dt.textContent = etiqueta;
+            const dd = document.createElement("dd");
+            dd.textContent = String(valor);
+            lista.appendChild(dt);
+            lista.appendChild(dd);
+        }
+
+        async function cargarDispositivos(usuarioId) {
+            const contenedor = $("lista-dispositivos");
+            contenedor.textContent = "Cargando dispositivos…";
+            let sesiones;
+            try {
+                sesiones = await api(`/admin/api/usuarios/${usuarioId}/sesiones`);
+            } catch (error) {
+                contenedor.textContent = error.message;
+                return;
+            }
+            contenedor.textContent = "";
+            $("sesiones-actuales").textContent = sesiones.length
+                ? `${sesiones.length} dispositivos con sesión abierta.`
+                : "Ningún dispositivo tiene la sesión abierta.";
+            sesiones.forEach((sesion) => {
+                const datos = sesion.dispositivo || {};
+                const tarjeta = document.createElement("div");
+                tarjeta.className = "dispositivo";
+                const titulo = document.createElement("div");
+                titulo.className = "dispositivo-titulo";
+                titulo.textContent = [sesion.nombre_dispositivo || "Dispositivo sin nombre", datos.modelo].filter(Boolean).join(" · ");
+                tarjeta.appendChild(titulo);
+                const lista = document.createElement("dl");
+                fila(lista, "IP actual", sesion.ip_ultima);
+                if (sesion.ip_inicio && sesion.ip_inicio !== sesion.ip_ultima) {
+                    fila(lista, "IP al iniciar", sesion.ip_inicio);
+                }
+                Object.keys(datos).forEach((clave) => {
+                    if (clave !== "modelo" || !titulo.textContent.includes(datos.modelo)) {
+                        fila(lista, ETIQUETAS_DISPOSITIVO[clave] || clave, datos[clave]);
+                    }
+                });
+                fila(lista, "Inició sesión", fechaYHora(sesion.iniciada_en));
+                fila(lista, "Última actividad", `${haceCuanto(sesion.ultimo_uso_en)} (${fechaYHora(sesion.ultimo_uso_en)})`);
+                fila(lista, "Sesión vence", fechaYHora(sesion.expira_en));
+                fila(lista, "Navegador o app", sesion.agente_usuario);
+                tarjeta.appendChild(lista);
+                const boton = document.createElement("button");
+                boton.type = "button";
+                boton.className = "boton peligro";
+                boton.textContent = "Cerrar esta sesión";
+                boton.addEventListener("click", () => conBoton(boton, async () => {
+                    try {
+                        await api(`/admin/api/sesiones/${sesion.id}/cerrar`, "POST");
+                        await cargarDispositivos(usuarioId);
+                        editando.sesiones_activas = Math.max(0, editando.sesiones_activas - 1);
+                        actualizarEnLista(editando);
+                    } catch (error) {
+                        mensaje("sesiones-mensaje", error.message);
+                    }
+                }));
+                tarjeta.appendChild(boton);
+                contenedor.appendChild(tarjeta);
+            });
+        }
+
+        function abrirDialogo(usuario) {
+            editando = usuario || null;
+            const nuevo = !editando;
+            $("dialogo-titulo").textContent = nuevo ? "Nuevo usuario" : `Editar a ${editando.nombre}`;
+            $("titulo-datos").textContent = nuevo ? "Datos de la cuenta" : "Datos";
+            $("campo-nombre").value = nuevo ? "" : editando.nombre;
+            $("campo-usuario").value = nuevo ? "" : editando.nombre_usuario || "";
+            $("campo-contrasena").value = "";
+            $("campo-contrasena").required = nuevo;
+            $("etiqueta-contrasena").textContent = nuevo ? "Contraseña (mínimo 8)" : "Nueva contraseña (déjala vacía para no cambiarla)";
+            $("campo-correo").value = "";
+            $("bloque-correo").classList.toggle("oculta", !nuevo);
+            $("campo-administrador").checked = nuevo ? false : editando.es_administrador;
+            $("bloque-activo").classList.toggle("oculta", nuevo);
+            $("campo-activo").checked = nuevo ? true : editando.activo;
+            $("boton-guardar").textContent = nuevo ? "Crear usuario" : "Guardar cambios";
+            $("formulario-proveedor").classList.toggle("oculta", nuevo);
+            $("seccion-sesiones").classList.toggle("oculta", nuevo);
+            ["datos-mensaje", "proveedor-mensaje", "sesiones-mensaje"].forEach((id) => mensaje(id, ""));
+            if (nuevo) {
+                prepararProveedor($("bloque-proveedor-nuevo"), null);
+                const titulo = document.createElement("h4");
+                titulo.textContent = "Proveedor IPTV";
+                $("bloque-proveedor-nuevo").prepend(titulo);
+            } else {
+                $("bloque-proveedor-nuevo").textContent = "";
+                const actual = editando.proveedores[0];
+                prepararProveedor($("bloque-proveedor"), actual ? actual.cuenta_id : null);
+                const cuentaActual = actual && cuentas.find((cuenta) => cuenta.id === actual.cuenta_id);
+                $("proveedor-actual").textContent = actual
+                    ? `Actual: ${cuentaActual ? cuentaActual.etiqueta + " — " : ""}${actual.servidor} (usuario ${actual.nombre_usuario}, ${actual.estado_cuenta}${actual.expira_en ? `, vence ${formatearFecha(actual.expira_en)}` : ""})`
+                    : "Sin proveedor asignado.";
+                $("sesiones-actuales").textContent = `${editando.sesiones_activas} sesiones abiertas (teles, celulares o esta página).`;
+                cargarDispositivos(editando.id);
+            }
+            $("dialogo").showModal();
+        }
+
+        async function conBoton(boton, tarea) {
+            boton.disabled = true;
+            try {
+                await tarea();
+            } finally {
+                boton.disabled = false;
+            }
+        }
+
+        function actualizarEnLista(usuario) {
+            const posicion = usuarios.findIndex((elemento) => elemento.id === usuario.id);
+            if (posicion >= 0) {
+                usuarios[posicion] = usuario;
+            } else {
+                usuarios.push(usuario);
+            }
+            pintarUsuarios();
+        }
+
+        $("formulario-login").addEventListener("submit", async (evento) => {
+            evento.preventDefault();
+            const boton = evento.submitter;
+            await conBoton(boton, async () => {
+                $("login-error").textContent = "";
+                const respuesta = await fetch("/auth/iniciar-sesion", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        usuario: $("login-usuario").value.trim(),
+                        contrasena: $("login-contrasena").value,
+                        nombre_dispositivo: "Administración web"
+                    })
+                });
+                const datos = await respuesta.json().catch(() => ({}));
+                if (!respuesta.ok) {
+                    $("login-error").textContent = textoDeError(datos.detail, respuesta.status);
+                    return;
+                }
+                if (!datos.usuario.es_administrador) {
+                    await fetch("/auth/cerrar-sesion", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ token_refresco: datos.token_refresco })
+                    });
+                    $("login-error").textContent = "Esa cuenta no es de administrador.";
+                    return;
+                }
+                $("login-contrasena").value = "";
+                guardarSesion(datos);
+                await mostrarPanel();
+            });
+        });
+
+        $("boton-salir").addEventListener("click", async () => {
+            if (sesion) {
+                await fetch("/auth/cerrar-sesion", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ token_refresco: sesion.token_refresco })
+                }).catch(() => null);
+            }
+            mostrarLogin();
+        });
+
+        $("boton-nuevo").addEventListener("click", () => abrirDialogo(null));
+        document.querySelectorAll(".pestana").forEach((pestana) => pestana.addEventListener("click", () => mostrarPestana(pestana.dataset.pestana)));
+        $("boton-nueva-cuenta").addEventListener("click", () => abrirCuenta(null));
+        $("boton-cerrar-cuenta").addEventListener("click", () => $("dialogo-cuenta").close());
+        $("formulario-cuenta").addEventListener("submit", async (evento) => {
+            evento.preventDefault();
+            await conBoton($("boton-guardar-cuenta"), async () => {
+                const datos = {
+                    etiqueta: $("cuenta-etiqueta").value.trim(),
+                    url_base: $("cuenta-url").value.trim(),
+                    nombre_usuario: $("cuenta-usuario").value.trim(),
+                    notas: $("cuenta-notas").value.trim(),
+                    predeterminada: $("cuenta-predeterminada").checked,
+                    validar: $("cuenta-validar").checked
+                };
+                const contrasena = $("cuenta-contrasena").value;
+                if (contrasena) {
+                    datos.contrasena = contrasena;
+                }
+                mensaje("cuenta-mensaje", datos.validar ? "Comprobando con el proveedor…" : "Guardando…", true);
+                try {
+                    const guardada = cuentaEditando
+                        ? await api(`/admin/api/proveedores/${cuentaEditando.id}`, "PATCH", datos)
+                        : await api("/admin/api/proveedores", "POST", datos);
+                    reemplazarCuenta(guardada);
+                    if (cuentaEditando) {
+                        await cargarUsuarios();
+                    }
+                    $("dialogo-cuenta").close();
+                } catch (error) {
+                    mensaje("cuenta-mensaje", error.message);
+                }
+            });
+        });
+        $("boton-cerrar-dialogo").addEventListener("click", () => $("dialogo").close());
+        $("filtro").addEventListener("input", pintarUsuarios);
+
+        $("formulario-datos").addEventListener("submit", async (evento) => {
+            evento.preventDefault();
+            await conBoton($("boton-guardar"), async () => {
+                const contrasena = $("campo-contrasena").value;
+                try {
+                    if (!editando) {
+                        const creado = await api("/admin/api/usuarios", "POST", {
+                            nombre: $("campo-nombre").value.trim(),
+                            nombre_usuario: $("campo-usuario").value.trim(),
+                            contrasena,
+                            correo: $("campo-correo").value.trim() || null,
+                            es_administrador: $("campo-administrador").checked,
+                            proveedor: leerProveedor($("bloque-proveedor-nuevo"))
+                        });
+                        actualizarEnLista(creado);
+                        $("dialogo").close();
+                        return;
+                    }
+                    const cambios = {
+                        nombre: $("campo-nombre").value.trim(),
+                        nombre_usuario: $("campo-usuario").value.trim(),
+                        activo: $("campo-activo").checked,
+                        es_administrador: $("campo-administrador").checked
+                    };
+                    if (contrasena) {
+                        cambios.contrasena = contrasena;
+                    }
+                    editando = await api(`/admin/api/usuarios/${editando.id}`, "PATCH", cambios);
+                    actualizarEnLista(editando);
+                    $("campo-contrasena").value = "";
+                    $("sesiones-actuales").textContent = `${editando.sesiones_activas} sesiones abiertas (teles, celulares o esta página).`;
+                    mensaje("datos-mensaje", "Cambios guardados.", true);
+                } catch (error) {
+                    mensaje("datos-mensaje", error.message);
+                }
+            });
+        });
+
+        $("formulario-proveedor").addEventListener("submit", async (evento) => {
+            evento.preventDefault();
+            await conBoton(evento.submitter, async () => {
+                try {
+                    editando = await api(`/admin/api/usuarios/${editando.id}/proveedor`, "PUT", leerProveedor($("bloque-proveedor")));
+                    actualizarEnLista(editando);
+                    abrirDialogo(editando);
+                    mensaje("proveedor-mensaje", "Proveedor actualizado.", true);
+                } catch (error) {
+                    mensaje("proveedor-mensaje", error.message);
+                }
+            });
+        });
+
+        $("boton-cerrar-sesiones").addEventListener("click", async () => {
+            await conBoton($("boton-cerrar-sesiones"), async () => {
+                try {
+                    const resultado = await api(`/admin/api/usuarios/${editando.id}/cerrar-sesiones`, "POST");
+                    if (editando.id === sesion.usuario.id) {
+                        mostrarLogin("Cerraste tus propias sesiones; vuelve a entrar.");
+                        $("dialogo").close();
+                        return;
+                    }
+                    editando.sesiones_activas = 0;
+                    actualizarEnLista(editando);
+                    $("lista-dispositivos").textContent = "";
+                    $("sesiones-actuales").textContent = "0 sesiones abiertas.";
+                    mensaje("sesiones-mensaje", `Se cerraron ${resultado.cerradas} sesiones.`, true);
+                } catch (error) {
+                    mensaje("sesiones-mensaje", error.message);
+                }
+            });
+        });
+
+        if (sesion) {
+            mostrarPanel();
+        } else {
+            mostrarLogin();
+        }
+    </script>
+</body>
+</html>

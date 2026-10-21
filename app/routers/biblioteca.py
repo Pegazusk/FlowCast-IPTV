@@ -7,10 +7,18 @@ from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.deps import SesionBD, UsuarioActual
-from app.models import ConexionXtream, Favorito, Historial, ProgresoReproduccion, Usuario
+from app.models import (
+    ConexionXtream,
+    Favorito,
+    Historial,
+    PistasSerie,
+    ProgresoReproduccion,
+    Usuario,
+)
 from app.routers.catalogo import quitar_bloqueados
 from app.routers.conexiones import ClienteHTTP
 from app.routers.perfiles import PerfilPropio
+from app.schemas.biblioteca import PistasSerie as EsquemaPistas
 from app.schemas.biblioteca import (
     RespuestaFavorito,
     RespuestaHistorial,
@@ -247,3 +255,34 @@ async def borrar_entrada_historial(
 async def vaciar_historial(perfil: PerfilPropio, sesion_bd: SesionBD) -> None:
     await sesion_bd.execute(delete(Historial).where(Historial.perfil_id == perfil.id))
     await sesion_bd.commit()
+
+
+@router.get("/pistas/{conexion_id}/{serie_id}", response_model=EsquemaPistas)
+async def ver_pistas_de_serie(
+    perfil: PerfilPropio, sesion_bd: SesionBD, conexion_id: uuid.UUID, serie_id: str
+) -> EsquemaPistas:
+    guardadas = await sesion_bd.get(PistasSerie, (perfil.id, conexion_id, serie_id))
+    if guardadas is None:
+        return EsquemaPistas()
+    return EsquemaPistas(audio=guardadas.audio, subtitulos=guardadas.subtitulos)
+
+
+@router.put("/pistas/{conexion_id}/{serie_id}", response_model=EsquemaPistas)
+async def guardar_pistas_de_serie(
+    datos: EsquemaPistas,
+    perfil: PerfilPropio,
+    usuario: UsuarioActual,
+    sesion_bd: SesionBD,
+    conexion_id: uuid.UUID,
+    serie_id: str,
+) -> EsquemaPistas:
+    await _exigir_conexion_propia(sesion_bd, usuario, conexion_id)
+    guardadas = await sesion_bd.get(PistasSerie, (perfil.id, conexion_id, serie_id))
+    if guardadas is None:
+        guardadas = PistasSerie(perfil_id=perfil.id, conexion_id=conexion_id, serie_id=serie_id)
+        sesion_bd.add(guardadas)
+    guardadas.audio = datos.audio
+    guardadas.subtitulos = datos.subtitulos
+    guardadas.actualizado_en = datetime.now(UTC)
+    await sesion_bd.commit()
+    return EsquemaPistas(audio=guardadas.audio, subtitulos=guardadas.subtitulos)

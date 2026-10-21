@@ -1,3 +1,4 @@
+import asyncio
 import uuid
 from collections.abc import AsyncIterator
 from datetime import UTC, datetime
@@ -20,11 +21,29 @@ from app.services.conexion_inicial import asegurar_conexion_inicial
 router = APIRouter(prefix="/conexiones", tags=["conexiones"])
 
 
+_clientes: dict[asyncio.AbstractEventLoop, httpx.AsyncClient] = {}
+
+
+def cliente_compartido(segundos: float = xtream.TIEMPO_ESPERA_SEGUNDOS) -> httpx.AsyncClient:
+    bucle = asyncio.get_running_loop()
+    cliente = _clientes.get(bucle)
+    if cliente is None or cliente.is_closed:
+        cliente = httpx.AsyncClient(
+            timeout=segundos, headers=xtream.CABECERAS, follow_redirects=True
+        )
+        _clientes[bucle] = cliente
+    return cliente
+
+
+async def cerrar_clientes() -> None:
+    bucle = asyncio.get_running_loop()
+    cliente = _clientes.pop(bucle, None)
+    if cliente is not None:
+        await cliente.aclose()
+
+
 async def obtener_cliente_http() -> AsyncIterator[httpx.AsyncClient]:
-    async with httpx.AsyncClient(
-        timeout=xtream.TIEMPO_ESPERA_SEGUNDOS, headers=xtream.CABECERAS, follow_redirects=True
-    ) as cliente:
-        yield cliente
+    yield cliente_compartido()
 
 
 ClienteHTTP = Annotated[httpx.AsyncClient, Depends(obtener_cliente_http)]

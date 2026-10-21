@@ -11,6 +11,7 @@ from app import security
 from app.deps import SesionBD, UsuarioActual
 from app.models import Perfil
 from app.schemas.perfiles import (
+    Preferencias,
     RespuestaPerfil,
     SolicitudActualizarPerfil,
     SolicitudCrearPerfil,
@@ -43,6 +44,7 @@ def _respuesta(perfil: Perfil) -> RespuestaPerfil:
         es_infantil=perfil.es_infantil,
         tiene_pin=perfil.hash_pin_parental is not None,
         url_imagen=_url_imagen(perfil),
+        preferencias=Preferencias.model_validate(perfil.preferencias or {}),
         creado_en=perfil.creado_en,
     )
 
@@ -106,6 +108,8 @@ async def actualizar_perfil(
         perfil.avatar = datos.avatar
     if datos.es_infantil is not None:
         perfil.es_infantil = datos.es_infantil
+    if datos.preferencias is not None:
+        perfil.preferencias = datos.preferencias.model_dump()
     if datos.quitar_pin:
         perfil.hash_pin_parental = None
     elif datos.pin is not None:

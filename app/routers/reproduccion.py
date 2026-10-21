@@ -13,7 +13,7 @@ from app.routers.catalogo import (
 )
 from app.routers.conexiones import ClienteHTTP
 from app.schemas.reproduccion import RespuestaReproduccion
-from app.services import xtream
+from app.services import cache, xtream
 
 router = APIRouter(prefix="/conexiones/{conexion_id}/reproducir", tags=["reproduccion"])
 
@@ -34,6 +34,24 @@ def _o_422(construir):
         return construir()
     except ValueError as error:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(error)) from None
+
+
+Detectar = Annotated[
+    bool,
+    Query(description="Leer los primeros bytes del video para usar su extensión real"),
+]
+
+
+async def _extension_real(
+    contexto, cliente, tipo: str, contenido_id: str, extension: str, construir
+):
+    url = _o_422(lambda: construir(contexto.credenciales, contenido_id, extension))
+    real = await cache.obtener_o_calcular(
+        contexto.clave("extension", tipo, contenido_id),
+        lambda: xtream.detectar_extension(url, cliente=cliente),
+        SEGUNDOS_FICHAS,
+    )
+    return real or extension
 
 
 @router.get("/en-vivo/{canal_id}", response_model=RespuestaReproduccion)
@@ -72,6 +90,7 @@ async def reproducir_pelicula(
     extension: Annotated[
         str | None, Query(description="mp4, mkv... Si falta se consulta la ficha")
     ] = None,
+    detectar: Detectar = False,
 ) -> RespuestaReproduccion:
     ficha = await _ficha_o_none(
         contexto.clave("pelicula", pelicula_id),
@@ -83,6 +102,10 @@ async def reproducir_pelicula(
         control.exigir(_esta_bloqueado(ficha.pelicula, bloqueadas))
     if extension is None:
         extension = ficha.pelicula.extension or EXTENSION_POR_DEFECTO
+    if detectar:
+        extension = await _extension_real(
+            contexto, cliente, "pelicula", pelicula_id, extension, xtream.url_pelicula
+        )
     url = _o_422(lambda: xtream.url_pelicula(contexto.credenciales, pelicula_id, extension))
     return RespuestaReproduccion(
         url=url, formato=extension, tipo_contenido="pelicula", contenido_id=pelicula_id
@@ -99,6 +122,7 @@ async def reproducir_episodio(
     extension: Annotated[
         str | None, Query(description="mp4, mkv... Si falta se busca en la ficha de la serie")
     ] = None,
+    detectar: Detectar = False,
 ) -> RespuestaReproduccion:
     ficha = await _ficha_o_none(
         contexto.clave("serie", serie_id),
@@ -123,6 +147,10 @@ async def reproducir_episodio(
                 status.HTTP_404_NOT_FOUND, detail="Ese episodio no pertenece a la serie"
             )
         extension = episodio.extension or EXTENSION_POR_DEFECTO
+    if detectar:
+        extension = await _extension_real(
+            contexto, cliente, "episodio", episodio_id, extension, xtream.url_episodio
+        )
     url = _o_422(lambda: xtream.url_episodio(contexto.credenciales, episodio_id, extension))
     return RespuestaReproduccion(
         url=url, formato=extension, tipo_contenido="episodio", contenido_id=episodio_id
