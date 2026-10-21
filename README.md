@@ -11,6 +11,7 @@ El catálogo (canales en vivo, películas y series) se lee del proveedor Xtream 
 ## Funciones
 
 - **Cuentas y sesiones:** registro, inicio de sesión con tokens de acceso y de refresco, sesiones por dispositivo y límite de intentos fallidos
+- **Seguridad:** contraseñas con Argon2, credenciales del proveedor cifradas, CORS restringido, cabeceras de seguridad y documentación de la API oculta en producción
 - **Perfiles:** avatares, perfiles infantiles, preferencias, y audio y subtítulos recordados por serie
 - **Catálogo:**
   - canales en vivo con guía de programación (EPG)
@@ -21,7 +22,8 @@ El catálogo (canales en vivo, películas y series) se lee del proveedor Xtream 
 - **Control parental:** PIN y bloqueo de categorías para adultos
 - **Música:** biblioteca de audio propia
 - **Administración:**
-  - cuentas FlowCast y cuentas de proveedor
+  - cuentas FlowCast: crear, editar, desactivar y eliminar
+  - cuentas de proveedor: varias cuentas, una predeterminada y traspaso de usuarios al eliminar
   - dispositivos con sesión abierta: IP, modelo y sistema
 
 ## Tecnología
@@ -33,7 +35,6 @@ El catálogo (canales en vivo, películas y series) se lee del proveedor Xtream 
 | Base de datos | PostgreSQL 17 con SQLAlchemy (async) |
 | Seguridad | Argon2, JWT y cifrado de las credenciales del proveedor |
 | Dependencias | [uv](https://docs.astral.sh/uv/) |
-| Pruebas | pytest |
 
 ## Estructura
 
@@ -46,7 +47,6 @@ app/
   static/     panel de administración
 db/           esquema de PostgreSQL
 tools/        rutinas: sincronizar plataformas, crear administrador, migraciones
-tests/        pruebas automáticas
 ```
 
 ## Correr en local
@@ -65,15 +65,12 @@ La API queda en `http://localhost:8000` y el panel en `http://localhost:8000/adm
 
 Con `DOCUMENTACION_PUBLICA=true` en el `.env`, la documentación interactiva queda disponible en `/docs`.
 
-## Pruebas
+## Calidad de código
 
 ```bash
-uv run pytest
-uv run ruff check app tests
+uv run ruff check app
+uv run ruff format --check app
 ```
-
-## Despliegue
-
 
 ## Autores
 
