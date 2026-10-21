@@ -685,13 +685,28 @@
                     }
                 }));
                 acciones.appendChild(boton("Eliminar", "peligro", async () => {
-                    if (!confirm(`¿Eliminar la cuenta "${cuenta.etiqueta}"?`)) {
+                    $("proveedores-error").textContent = "";
+                    const nombre = `${cuenta.etiqueta} (${cuenta.servidor})`;
+                    const predeterminada = cuentas.find((otra) => otra.predeterminada && otra.id !== cuenta.id);
+                    if (cuenta.usuarios.length && cuenta.predeterminada) {
+                        $("proveedores-error").textContent = `${nombre} es la predeterminada: marca otra como predeterminada antes de eliminarla.`;
+                        return;
+                    }
+                    if (cuenta.usuarios.length && !predeterminada) {
+                        $("proveedores-error").textContent = `${nombre} la usan ${cuenta.usuarios.join(", ")} y no hay cuenta predeterminada a la cual pasarlos.`;
+                        return;
+                    }
+                    const pregunta = cuenta.usuarios.length
+                        ? `La cuenta ${nombre} la usan: ${cuenta.usuarios.join(", ")}.\n\nSe pasarán a la cuenta predeterminada ${predeterminada.etiqueta} (${predeterminada.servidor}) y después se eliminará. ¿Continuar?`
+                        : `¿Eliminar la cuenta ${nombre}?`;
+                    if (!confirm(pregunta)) {
                         return;
                     }
                     try {
-                        await api(`/admin/api/proveedores/${cuenta.id}`, "DELETE");
-                        cuentas = cuentas.filter((otra) => otra.id !== cuenta.id);
-                        pintarCuentas();
+                        const mover = cuenta.usuarios.length ? "?mover_usuarios=true" : "";
+                        await api(`/admin/api/proveedores/${cuenta.id}${mover}`, "DELETE");
+                        await cargarCuentas();
+                        await cargarUsuarios();
                     } catch (error) {
                         $("proveedores-error").textContent = error.message;
                     }
@@ -799,7 +814,11 @@
                 celda(
                     fila,
                     proveedor ? (cuentaDelUsuario ? `${cuentaDelUsuario.etiqueta} · ${proveedor.servidor}` : proveedor.servidor) : "Sin proveedor",
-                    proveedor ? [proveedor.estado_cuenta, proveedor.expira_en ? `vence ${formatearFecha(proveedor.expira_en)}` : ""].filter(Boolean).join(" · ") : ""
+                    proveedor ? [
+                        proveedor.estado_cuenta,
+                        proveedor.expira_en ? `vence ${formatearFecha(proveedor.expira_en)}` : "",
+                        usuario.proveedores.length > 1 ? `+${usuario.proveedores.length - 1} cuenta${usuario.proveedores.length > 2 ? "s" : ""} más` : ""
+                    ].filter(Boolean).join(" · ") : ""
                 );
                 celda(fila, String(usuario.sesiones_activas));
                 const estado = celda(fila, "");

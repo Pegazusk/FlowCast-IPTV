@@ -409,14 +409,55 @@ async def _propagar(
 ) -> None:
     consulta = select(ConexionXtream).where(ConexionXtream.cuenta_proveedor_id == cuenta.id)
     for conexion in (await sesion_bd.execute(consulta)).scalars():
-        conexion.etiqueta = cuenta.etiqueta
-        conexion.url_base_cifrada = cuenta.url_base_cifrada
-        conexion.nombre_usuario_cifrado = cuenta.nombre_usuario_cifrado
-        conexion.contrasena_cifrada = cuenta.contrasena_cifrada
-        conexion.huella = cuenta.huella
+        _copiar_cuenta(conexion, cuenta)
         if info is not None:
             conexion.actualizar_desde_info(info)
-        cache.invalidar(f"conexion:{conexion.id}:")
+
+
+def _copiar_cuenta(conexion: ConexionXtream, cuenta: CuentaProveedor) -> None:
+    conexion.cuenta_proveedor_id = cuenta.id
+    conexion.etiqueta = cuenta.etiqueta
+    conexion.url_base_cifrada = cuenta.url_base_cifrada
+    conexion.nombre_usuario_cifrado = cuenta.nombre_usuario_cifrado
+    conexion.contrasena_cifrada = cuenta.contrasena_cifrada
+    conexion.huella = cuenta.huella
+    conexion.estado_cuenta = cuenta.estado_cuenta
+    conexion.expira_en = cuenta.expira_en
+    conexion.max_conexiones = cuenta.max_conexiones
+    cache.invalidar(f"conexion:{conexion.id}:")
+
+
+async def _mover_a_predeterminada(sesion_bd: AsyncSession, cuenta: CuentaProveedor) -> None:
+    if cuenta.predeterminada:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            detail="Es la cuenta predeterminada: marca otra como predeterminada antes de eliminarla",
+        )
+    destino = await conexion_inicial.cuenta_predeterminada(sesion_bd)
+    if destino is None:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            detail="No hay cuenta predeterminada a la cual pasar a sus usuarios",
+        )
+    consulta = select(ConexionXtream).where(ConexionXtream.cuenta_proveedor_id == cuenta.id)
+    conexiones = list((await sesion_bd.execute(consulta)).scalars())
+    con_destino = set(
+        (
+            await sesion_bd.execute(
+                select(ConexionXtream.usuario_id).where(
+                    ConexionXtream.cuenta_proveedor_id == destino.id,
+                    ConexionXtream.usuario_id.in_([c.usuario_id for c in conexiones]),
+                )
+            )
+        ).scalars()
+    )
+    for conexion in conexiones:
+        if conexion.usuario_id in con_destino:
+            cache.invalidar(f"conexion:{conexion.id}:")
+            await sesion_bd.delete(conexion)
+            continue
+        _copiar_cuenta(conexion, destino)
+        con_destino.add(conexion.usuario_id)
 
 
 def _cuenta_repetida() -> HTTPException:
@@ -523,14 +564,20 @@ async def revisar_cuenta_proveedor(
 
 @router.delete("/proveedores/{cuenta_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def borrar_cuenta_proveedor(
-    cuenta_id: uuid.UUID, _administrador: AdministradorActual, sesion_bd: SesionBD
+    cuenta_id: uuid.UUID,
+    _administrador: AdministradorActual,
+    sesion_bd: SesionBD,
+    mover_usuarios: bool = False,
 ) -> None:
     cuenta = await _buscar_cuenta(sesion_bd, cuenta_id)
     usuarios = (await _describir_cuentas(sesion_bd, [cuenta]))[0].usuarios
-    if usuarios:
+    if usuarios and not mover_usuarios:
         raise HTTPException(
             status.HTTP_409_CONFLICT,
             detail=f"No se puede eliminar: la usan {', '.join(usuarios)}",
         )
+    if usuarios:
+        await _mover_a_predeterminada(sesion_bd, cuenta)
+        await sesion_bd.flush()
     await sesion_bd.delete(cuenta)
     await sesion_bd.commit()
